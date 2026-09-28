@@ -32,7 +32,7 @@ def add_messiness(df, numeric_cols, null_rate=0.01, dup_rate=0.005, late_rate=0.
     dupe_rows = df.sample(n=n_dupes, replace=True)
     df = pd.concat([df, dupe_rows], ignore_index=True)
 
-    # some records "arrive late" — the real event happened on `date`,
+    # some records "arrive late" - the real event happened on `date`,
     # but the system only reported it a few days after
     df["ingestion_date"] = df["date"]
     late_mask = np.random.rand(len(df)) < late_rate
@@ -101,7 +101,7 @@ def generate_performance():
 
 
 def generate_marketing():
-    # spend stays steady through the incident on purpose — a real "unrelated" signal
+    # spend stays steady through the incident on purpose - a real "unrelated" signal
     spend = np.random.normal(2000, 150, NUM_DAYS)
     df = pd.DataFrame({"date": dates, "spend": spend.round(2)})
     return add_messiness(df, ["spend"])
@@ -136,7 +136,12 @@ def generate_ops_events():
     rows.append({"date": dates[ANOMALY_DAY], "event_type": "incident", "event_count": 1})
 
     df = pd.DataFrame(rows)
-    return add_messiness(df, ["event_count"], null_rate=0.0, dup_rate=0.0)
+
+    # every real event gets its own unique id, like a real ops log would have.
+    # this is what lets us tell "sent twice" apart from "happened twice".
+    df.insert(0, "event_id", [f"evt-{i:06d}" for i in range(1, len(df) + 1)])
+
+    return add_messiness(df, ["event_count"], null_rate=0.0, dup_rate=0.02)
 
 
 def main():

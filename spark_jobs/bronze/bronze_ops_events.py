@@ -11,7 +11,9 @@ INGESTION_DATE = date.today().isoformat()
 RAW_PATH = f"{HDFS_URI}/raw/ops_events/ingestion_date={INGESTION_DATE}/ops_events.csv"
 BRONZE_PATH = f"{HDFS_URI}/bronze/ops_events"
 
+# the order here must match the column order in the CSV file
 schema = StructType([
+    StructField("event_id", StringType(), True),
     StructField("date", DateType(), True),
     StructField("event_type", StringType(), True),
     StructField("event_count", IntegerType(), True),

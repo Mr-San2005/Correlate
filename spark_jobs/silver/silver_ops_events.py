@@ -18,8 +18,9 @@ def main():
     df = spark.read.parquet(BRONZE_PATH)
     print(f"read {df.count()} rows from bronze ops_events")
 
-    # here, a duplicate means an identical event row - not one-per-date like the others
-    df = df.dropDuplicates(["date", "event_type", "event_count"])
+    # a duplicate is the SAME event_id sent twice - two different events
+    # that look alike (two deploys on one day) must both survive
+    df = df.dropDuplicates(["event_id"])
     print(f"{df.count()} rows after deduplication")
 
     # an unknown event type is a real gap in what we know - label it, don't guess

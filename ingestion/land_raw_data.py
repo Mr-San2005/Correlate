@@ -22,6 +22,10 @@ def run(cmd):
 
 
 def main():
+    # HDFS refuses writes for a short while after it starts (safe mode).
+    # this command simply waits until that startup check is finished.
+    run(["docker", "exec", CONTAINER, "hdfs", "dfsadmin", "-safemode", "wait"])
+
     for filename, source in SOURCES.items():
         local_path = LOCAL_DIR / filename
         container_tmp_path = f"/tmp/{filename}"
